@@ -2,8 +2,6 @@ import streamlit as st
 import requests
 import streamlit.components.v1 as components
 
-domain = st.secrets.fastapi_key
-
 st.title("Angel Foods")
 st.markdown('')
 st.divider()
@@ -32,7 +30,7 @@ if prompt := st.chat_input("What is up?"):
                 # Define your API endpoint URL with query parameter
                 # api_url = f"http://localhost:8001/main-model?query={prompt}"
                 
-                api_url = f"{domain}/main-model?query={prompt}"
+                api_url = f"https://enhanced-redbird-artistic.ngrok-free.app/main-model?query={prompt}"
             
                 # Define headers (optional, modify as needed)
                 headers = {

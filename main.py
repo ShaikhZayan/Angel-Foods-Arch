@@ -18,6 +18,7 @@ from pydantic import BaseModel
 from langchain_google_genai import GoogleGenerativeAI, HarmBlockThreshold, HarmCategory
 from langchain_core.prompts import PromptTemplate
 import string
+import pandas as pd
 
 app = FastAPI()
 
@@ -58,6 +59,97 @@ app.add_middleware(
 
 
 
+# @app.post("/main-model")
+# async def model_new(query: str):
+#     # Define API key and LLM
+#     # groq_api = "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"
+#     # llm = ChatGroq(temperature=0.4, model="llama3-70b-8192", api_key=groq_api, verbose=True)
+    
+#     # Initialize the Google LLM (Gemini)
+#     llm = ChatGoogleGenerativeAI(
+#         model='gemini-1.5-flash',
+#         verbose=True,
+#         temperature=0.2,
+#         safety_settings={
+#             HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+#             HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+#             HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+#             HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+#             },
+#         google_api_key=os.getenv('GOOGLE_API_KEY')
+#     )
+
+
+
+#     # Use the create_csv_agent function to initialize the tool
+#     tool = create_csv_agent(llm, "Angel.csv", verbose=True, allow_dangerous_code=False)
+
+#     def query_data(query):
+#         # Instructions for the LLM
+#         instructions = """
+#         You are an expert data analyst using the latest AI technologies. 
+#         Your job is to analyze the data from the CSV file and provide concise, clear answers without any unnecessary repetition.
+#         Please ensure that your responses are clear, accurate, and free of additional or irrelevant information.
+#         Avoid repeating phrases, and ensure that your answer concludes with only one complete sentence if possible.
+
+#         If your answer includes any additional statements or information after a complete sentence, please omit those extras. 
+#         If the query is unclear, ask for clarification before proceeding.
+    
+#         Let me give you some specific instructions about our CSV data:
+        
+#         - The data consists of 16 columns:
+#           1. customer_reference
+#           2. company_name
+#           3. Banner
+#           4. Cluster
+#           5. Cluster Size
+#           6. suburb
+#           7. postalcode
+#           8. state
+#           9. value
+#           10. cash_on_delivery
+#           11. code
+#           12. description
+#           13. uom_qty
+#           14. qty
+#           15. unit_of_Measure
+        
+#         - Special Handling:
+#           - The **customer_reference** column contains order numbers. Some order numbers repeat, so **do not calculate** repeated order numbers.
+#           - The **company_name** is the name of the company or store, along with the short area or street address. The **Banner** is just the company name without the street address.
+#           - The **value** column represents the total order value (price).
+#           - The **cash_on_delivery** is typically 'No', meaning most orders are not delivered with cash on delivery.
+#           - The **qty** (Quantity) represents the total number of units in the order. If the **qty** is greater than 8, this indicates at least **1 carton**. 
+#           - The **uom_qty** (Unit Order Measurement Quantity) reflects the number of cartons:
+#             - 1 carton = 8 units. 
+#             - For example, if **qty** is 16, there are **2 cartons**, so **uom_qty** should be 2.
+    
+#         Please use these instructions when analyzing the data and answering the query.
+#         """
+        
+#         # Combine instructions with the user query
+#         full_query = f"{instructions}\n\nUser Query: {query}"
+        
+#         # Run the query with the tool
+#         response = tool.run(full_query)
+#         return response
+
+#     response = query_data(query)
+
+
+#     # Print the beautified response
+#     return {"result": response}
+
+   
+
+
+
+
+
+
+
+
+
 @app.post("/main-model")
 async def model_new(query: str):
     # Define API key and LLM
@@ -68,7 +160,7 @@ async def model_new(query: str):
     llm = ChatGoogleGenerativeAI(
         model='gemini-1.5-flash',
         verbose=True,
-        temperature=0.7,
+        temperature=0.2,
         safety_settings={
             HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
             HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_ONLY_HIGH,
@@ -78,7 +170,7 @@ async def model_new(query: str):
         google_api_key=os.getenv('GOOGLE_API_KEY')
     )
 
-
+    df = pd.readcsv()
 
     # Use the create_csv_agent function to initialize the tool
     tool = create_csv_agent(llm, "Angel.csv", verbose=True, allow_dangerous_code=False)
@@ -87,8 +179,11 @@ async def model_new(query: str):
         # Instructions for the LLM
         instructions = """
         You are an expert data analyst using the latest AI technologies. 
-        Your job is to analyze the data from the CSV file and provide concise, clear answers and dont do any hullucination & repeat answers.
-        Always explain your reasoning if needed and prioritize accuracy and clarity in your responses.
+        Your job is to analyze the data from the CSV file and provide concise, clear answers without any unnecessary repetition.
+        Please ensure that your responses are clear, accurate, and free of additional or irrelevant information.
+        Avoid repeating phrases, and ensure that your answer concludes with only one complete sentence if possible.
+
+        If your answer includes any additional statements or information after a complete sentence, please omit those extras. 
         If the query is unclear, ask for clarification before proceeding.
     
         Let me give you some specific instructions about our CSV data:
@@ -136,7 +231,15 @@ async def model_new(query: str):
     # Print the beautified response
     return {"result": response}
 
-   
+
+
+
+
+
+
+
+
+
    
    
    
@@ -219,4 +322,4 @@ def decoding_token(token: Annotated[str, Depends(oauth2_scheme)]):
 
 
 if __name__ == "__main__":
-    uvicorn.run('uvicorn main:app --reload --port 8001')
+    uvicorn.run('main:app', host = '0.0.0.0', port = '8001', reload = True)
