@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import streamlit.components.v1 as components
 
-domain = st.secrets.fastapi_key
+domain = st.secrets["fastapi_key"]
 
 st.title("Angel Foods")
 st.markdown('')
